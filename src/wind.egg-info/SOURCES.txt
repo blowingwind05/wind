@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+src/plugins/weather_self/__init__.py
+src/plugins/weather_self/config.py
+src/wind.egg-info/PKG-INFO
+src/wind.egg-info/SOURCES.txt
+src/wind.egg-info/dependency_links.txt
+src/wind.egg-info/requires.txt
+src/wind.egg-info/top_level.txt
