@@ -11,6 +11,8 @@ dependencies = [
     "nonebot-plugin-localstore>=0.7.4",
     "nonebot-plugin-filehost>=1.1.1",
     "nonebot-plugin-epicfree>=0.2.12",
+    "requests>=2.25.0",
+    "beautifulsoup4>=4.9.0",
 ]
 
 [tool.nonebot]
@@ -27,5 +29,4 @@ nonebot-adapter-onebot = [
 "@local" = []
 nonebot-plugin-status = ["nonebot_plugin_status"]
 nonebot-plugin-localstore = ["nonebot_plugin_localstore"]
-nonebot-plugin-filehost = ["nonebot_plugin_filehost"]
 nonebot-plugin-epicfree = ["nonebot_plugin_epicfree"]

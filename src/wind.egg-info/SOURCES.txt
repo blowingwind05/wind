@@ -1,5 +1,7 @@
 README.md
 pyproject.toml
+src/plugins/school_bus/__init__.py
+src/plugins/school_bus/config.py
 src/plugins/weather_self/__init__.py
 src/plugins/weather_self/config.py
 src/wind.egg-info/PKG-INFO

@@ -5,7 +5,7 @@ from nonebot.adapters.onebot.v11 import Message, MessageSegment, escape
 
 
 
-wettr = on_command('天气', aliases={'wttr', 'weather', 'tianqi'})
+wettr = on_command('天气', aliases={'wttr', 'weather', 'tianqi'}, block=True, priority=5)
 
 
 @wettr.handle()
