@@ -1,5 +1,5 @@
 from nonebot import on_message, get_plugin_config, get_driver, logger
-from nonebot.adapters.onebot.v11 import GroupMessageEvent
+from nonebot.adapters.onebot.v11 import GroupMessageEvent, Bot
 from datetime import datetime
 import json
 import os
@@ -19,6 +19,9 @@ config_file = os.path.join(data_dir, "context_config.json")
 # 全局数据结构：按群号保存最近消息
 # 结构: {group_id: [msg1, msg2, ...]}
 recent_messages = {}
+
+# 机器人名字缓存 {group_id: bot_name}
+bot_name_cache = {}
 
 # 上下文窗口长度配置
 default_context_length = plugin_config.default_context_length
@@ -68,20 +71,33 @@ async def _(event: GroupMessageEvent):
         return
 
     group_id = event.group_id
-    add_message(group_id, event.user_id, event.sender.nickname or "未知用户", text)
+    # 保存 QQ 昵称和群昵称
+    add_message(
+        group_id=group_id, 
+        user_id=event.user_id, 
+        nickname=event.sender.nickname, 
+        text=text,
+        card=event.sender.card
+    )
 
-def add_message(group_id, user_id, nickname, text):
+def add_message(group_id, user_id, nickname, text, card=None):
     """保存一条消息"""
     if group_id not in recent_messages:
         recent_messages[group_id] = []
 
     context_length = group_context_lengths.get(group_id, default_context_length)
 
+    # 组合显示名称: 群昵称(QQ昵称) 如果不同的话
+    if card and nickname and card != nickname:
+        display_nickname = f"{card}({nickname})"
+    else:
+        display_nickname = card or nickname or "未知用户"
+
     msg = {
         "date": datetime.now().strftime("%Y-%m-%d"),
         "time": datetime.now(),
         "user_id": user_id,
-        "nickname": nickname,
+        "nickname": display_nickname,
         "message": text
     }
     
@@ -94,9 +110,28 @@ def get_group_history(group_id: int):
     """获取指定群的历史记录"""
     return recent_messages.get(group_id, [])
 
-def add_bot_message(group_id: int, bot_id: int, nickname: str, text: str):
-    """保存机器人的回复"""
-    add_message(group_id, bot_id, nickname, text)
+async def add_bot_message(bot: Bot, group_id: int, text: str):
+    """保存机器人的回复，自动获取机器人在该群的昵称"""
+    bot_id = int(bot.self_id)
+    
+    # 尝试从缓存获取机器人在此群的名字
+    cached_info = bot_name_cache.get(group_id)
+    
+    if not cached_info:
+        try:
+            # 获取机器人在该群的信息
+            info = await bot.get_group_member_info(group_id=group_id, user_id=bot_id)
+            nickname = info.get("nickname") or "让风吹过"
+            card = info.get("card")
+            bot_name_cache[group_id] = (nickname, card)
+            logger.debug(f"获取到机器人名片: {card or '<无>'}, QQ昵称: {nickname} (群 {group_id})")
+        except Exception as e:
+            logger.error(f"获取机器人群名片失败: {e}")
+            nickname, card = "让风吹过", None
+    else:
+        nickname, card = cached_info
+
+    add_message(group_id, bot_id, nickname, text, card=card)
     logger.info(f"群 {group_id} 记录机器人回复: {text}")
 
 # 历史查看和管理命令
