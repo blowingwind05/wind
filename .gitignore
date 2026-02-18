@@ -1,5 +1,4 @@
 ﻿.vscode
 .venv/
 .env.prod
-.env.prod.example
 src/wind.egg-info/

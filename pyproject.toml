@@ -13,6 +13,7 @@ dependencies = [
     "nonebot-plugin-epicfree>=0.2.12",
     "requests>=2.25.0",
     "beautifulsoup4>=4.9.0",
+    "nonebot-plugin-today-in-history>=0.1.6",
 ]
 
 [tool.nonebot]
@@ -30,3 +31,4 @@ nonebot-adapter-onebot = [
 nonebot-plugin-status = ["nonebot_plugin_status"]
 nonebot-plugin-localstore = ["nonebot_plugin_localstore"]
 nonebot-plugin-epicfree = ["nonebot_plugin_epicfree"]
+nonebot-plugin-today-in-history = ["nonebot_plugin_today_in_history"]
