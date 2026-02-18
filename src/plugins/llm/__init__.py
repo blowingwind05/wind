@@ -6,7 +6,7 @@ from .config import Config
 
 # 确保上下文管理器插件已加载并导入接口
 require("context_manager")
-from context_manager import get_group_history, add_bot_message
+from ..context_manager import get_group_history, add_bot_message
 
 # 加载插件配置
 plugin_config = get_plugin_config(Config)

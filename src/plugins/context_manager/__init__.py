@@ -1,4 +1,5 @@
 from nonebot import on_message, get_plugin_config, get_driver, logger
+from nonebot.rule import Rule, to_me
 from nonebot.adapters.onebot.v11 import GroupMessageEvent, Bot
 from datetime import datetime
 import json
@@ -134,8 +135,16 @@ async def add_bot_message(bot: Bot, group_id: int, text: str):
     add_message(group_id, bot_id, nickname, text, card=card)
     logger.info(f"群 {group_id} 记录机器人回复: {text}")
 
-# 历史查看和管理命令
-history_cmd = on_message(priority=10, block=False)
+def is_context_cmd():
+    async def _is_context_cmd(event: GroupMessageEvent) -> bool:
+        cmd = event.message.extract_plain_text().strip()
+        # 仅当匹配相关管理命令时才触发
+        return cmd in ["查看历史", "history", "查看上下文长度"] or \
+               cmd.startswith(("设置全局上下文长度", "设置群上下文长度"))
+    return Rule(_is_context_cmd)
+
+# 历史查看和管理命令，设置 block=True 以防止触发其他逻辑，并且需要 @ 机器人 (to_me)
+history_cmd = on_message(rule=to_me() & is_context_cmd(), priority=5, block=True)
 
 @history_cmd.handle()
 async def handle_history_cmd(event: GroupMessageEvent):
@@ -170,8 +179,9 @@ async def handle_history_cmd(event: GroupMessageEvent):
             await history_cmd.send("请输入有效的数字喵~")
             
     elif cmd.startswith("设置群上下文长度"):
+        # 群管理员或超级用户均可设置
         if event.sender.role not in ["admin", "owner"] and str(event.user_id) not in superusers:
-            await history_cmd.send("只有群管理员才能更改本群上下文长度喵~")
+            await history_cmd.send("只有群管理员或超级用户才能更改本群上下文长度喵~")
             return
         try:
             new_length = int(cmd.split()[-1])
